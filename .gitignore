@@ -2,3 +2,6 @@
 .terraform.*
 terraform.*
 app/out/*
+docs/diagrams.py
+app/s3-backend-config.hcl
+docs/*

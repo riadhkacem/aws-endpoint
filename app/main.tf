@@ -13,8 +13,9 @@ terraform {
       version = "3.6.3"
     }
   }
-  /*  backend "s3" {
-  }*/
+  backend "s3" {
+    
+  }
 }
 
 provider "aws" {
@@ -188,7 +189,7 @@ resource "aws_iam_role_policy" "report_lambda_function_cloudwatch_policy" {
 
 
 resource "aws_s3_bucket" "report_lambda_function_s3_bucket" {
-  count = var.report_bucket_exists ? 0 : 1
+  count  = var.report_bucket_exists ? 0 : 1
   bucket = var.report_bucket_name
   lifecycle {
     prevent_destroy = false
@@ -196,7 +197,7 @@ resource "aws_s3_bucket" "report_lambda_function_s3_bucket" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "report_lambda_function_s3_bucket" {
-  count = var.report_bucket_exists ? 0 : 1
+  count  = var.report_bucket_exists ? 0 : 1
   bucket = aws_s3_bucket.report_lambda_function_s3_bucket[0].id
   rule {
     apply_server_side_encryption_by_default {
@@ -206,7 +207,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "report_lambda_fun
 }
 
 resource "aws_s3_bucket_public_access_block" "report_lambda_function_s3_bucket" {
-  count = var.report_bucket_exists ? 0 : 1
+  count  = var.report_bucket_exists ? 0 : 1
   bucket = aws_s3_bucket.report_lambda_function_s3_bucket[0].id
 
   block_public_acls       = true

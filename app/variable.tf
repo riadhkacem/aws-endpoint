@@ -8,7 +8,6 @@ variable "store_payload_lambda_function_name" {
 
 variable "dynamodb_table_name" {
   type = string
-  default = "dynamodb_table"
 }
 
 variable "total_item_count_key_id" {
