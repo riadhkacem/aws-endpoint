@@ -31,7 +31,8 @@ jobs:
               run: |
                 terraform plan -var="region_name=${{env.AWS_REGION}}" \
                 -var="backend_bucket_name=${{env.TF_BACKEND_BUCKET_NAME}}" \
-                -var="locks_table_name=${{vars.TF_BACKEND_LOCKS_DYNAMODB_TABLE}}" -input=false
+                -var="locks_table_name=${{vars.TF_BACKEND_LOCKS_DYNAMODB_TABLE}}" \
+                -input=false
             - name: terraform apply
               id: apply
               run: |

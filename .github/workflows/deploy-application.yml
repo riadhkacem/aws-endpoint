@@ -1,0 +1,73 @@
+name: Deploy the application to aws
+on: 
+    push: 
+        branches: 'main'
+    workflow_dispatch: 
+        inputs:
+          recreate:
+            description: Recreate all resources
+            required: true
+            type: boolean
+            default: false
+jobs:
+    terraform:
+        name: deploy the application on aws using terraform
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash
+                working-directory: ./app/
+        env:
+            AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+            AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+            AWS_REGION: ${{vars.AWS_REGION}}
+            TF_BACKEND_BUCKET_NAME: ${{vars.TF_BACKEND_BUCKET_NAME}}
+            TF_BACKEND_BUCKET_KEY: ${{vars.TF_BACKEND_BUCKET_KEY}}
+            TF_BACKEND_LOCKS_DYNAMODB_TABLE: ${{vars.TF_BACKEND_LOCKS_DYNAMODB_TABLE}}
+            REPORT_BUCKET_NAME: ${{vars.REPORT_BUCKET_NAME}}
+            REPORT_BUCKET_EXISTS: ${{vars.REPORT_BUCKET_EXISTS}}
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+            - name: install terraform
+              uses: hashicorp/setup-terraform@v3
+            - name: terraform init
+              id: init
+              run: |
+                terraform init \
+                -backend-config="dynamodb_table=${{env.TF_BACKEND_LOCKS_DYNAMODB_TABLE}}" \
+                -backend-config="region=${{env.AWS_REGION}}" \
+                -backend-config="bucket=${{env.TF_BACKEND_BUCKET_NAME}}" \
+                -backend-config="key=${{env.TF_BACKEND_BUCKET_KEY}}" \
+                -input=false
+            - name: terraform validate
+              id: validate
+              run: terraform validate
+            - name: Destroy the resources
+              id: destroy
+              if: ${{github.event.inputs.recreate}}
+              run: |
+                terraform destroy \
+                -var="aws_region=${{env.AWS_REGION}}" \
+                -var="report_bucket_name=${{env.REPORT_BUCKET_NAME}}" \
+                -var="report_bucket_exists=${{env.REPORT_BUCKET_EXISTS}}" \
+                -auto-approve \
+                -input=false
+            - name: terraform plan
+              id: plan
+              run: |
+                terraform plan \
+                -var="aws_region=${{env.AWS_REGION}}" \
+                -var="report_bucket_name=${{env.REPORT_BUCKET_NAME}}" \
+                -var="report_bucket_exists=${{env.REPORT_BUCKET_EXISTS}}" \
+                -input=false
+            - name: terraform apply
+              id: apply
+              run: |
+                terraform apply \
+                -var="aws_region=${{env.AWS_REGION}}" \
+                -var="report_bucket_name=${{env.REPORT_BUCKET_NAME}}" \
+                -var="report_bucket_exists=${{env.REPORT_BUCKET_EXISTS}}" \
+                -auto-approve \
+                -input=false
+          
