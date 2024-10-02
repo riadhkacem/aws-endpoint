@@ -1,30 +1,43 @@
-# AWS Endpoint Integration
+# AWS Serverless Data Processing Application
 
-This project demonstrates the integration of various AWS services, including Lambda, DynamoDB, S3, and EventBridge, to create a serverless application that processes and stores data.
+## Project Overview
 
-## Features
+This project demonstrates a serverless application architecture using various AWS services to process and store data efficiently. The application leverages AWS Lambda, DynamoDB, S3, and EventBridge to create a scalable and event-driven system.
 
-- **Lambda Function**: A serverless function that receives messages and saves them to a DynamoDB database.
-- **DynamoDB Database**: A NoSQL database for storing messages received from the Lambda function.
-- **S3 Bucket**: An object storage service that automatically receives data triggered by an EventBridge event.
-- **EventBridge Event**: A scheduled event that triggers the automatic saving of data to the S3 bucket.
-- **Terraform Configuration**: Infrastructure as Code (IaC) setup using Terraform to manage the AWS resources, including the use of an S3 bucket as a remote backend for storing the Terraform state file.
+## Architecture
 
-## Prerequisites
+The application consists of two main components:
 
-- AWS Account
-- Python 3.8 or later
-- Terraform installed
+1. Data Ingestion Lambda Function
+2. Data Aggregation Lambda Function
 
-## Project Workflow
- - The Lambda function is invoked, either manually or through an event source (e.g., API Gateway, S3 event, etc.).
+### Component Details
 
- - The Lambda function processes the incoming data and saves the message to the DynamoDB database.
+#### 1. Data Ingestion Lambda Function
+- Receives payload data
+- Stores the received data in a DynamoDB table
 
- - Separately, an EventBridge event is scheduled to run periodically (e.g., daily, weekly, etc.).
+#### 2. Data Aggregation Lambda Function
+- Triggered by EventBridge on a schedule
+- Reads the item count from the DynamoDB table
+- Stores the count data in an S3 bucket
 
- - When the EventBridge event is triggered, it invokes a Lambda function or another AWS service to save data to the S3 bucket.
+## Infrastructure as Code
 
- - The Terraform configuration manages the provisioning and maintenance of the AWS resources used in this project, including the Lambda functions, DynamoDB table, S3 bucket, and EventBridge event.
+This project uses Terraform to manage and provision the AWS infrastructure. The Terraform state is stored remotely using:
+- S3 backend for state storage
+- DynamoDB for state locking
 
-This project demonstrates the integration of multiple AWS services, showcasing serverless computing, data storage, event-driven architectures, and infrastructure as code principles.
+## Continuous Integration and Deployment
+
+GitHub Actions workflows are implemented to automate the deployment process:
+1. Deploy the Terraform S3 backend with DynamoDB
+2. Deploy the application infrastructure and code to AWS
+
+## Getting Started
+
+To test the application, use the command curl -i -X POST -d "{'key1':'value1'}" <store_payload_lambda_function_url>
+
+## Configuration
+
+You need to configure the variables and secrets of the env block in the yml files of github workflows.
